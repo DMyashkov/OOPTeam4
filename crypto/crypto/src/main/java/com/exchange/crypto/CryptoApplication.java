@@ -1,14 +1,27 @@
 package com.exchange.crypto;
 
-import com.exchange.crypto.config.TelegramProperties;
+import com.exchange.crypto.service.TelegramNotificationService;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
-@EnableConfigurationProperties(TelegramProperties.class)
 public class CryptoApplication {
+
 	public static void main(String[] args) {
 		SpringApplication.run(CryptoApplication.class, args);
+	}
+
+	@Bean
+	public RestTemplate restTemplate() {
+		return new RestTemplate();
+	}
+
+	// Simple test on app startup
+	@Bean
+	public CommandLineRunner sendTelegramMessage(TelegramNotificationService telegramService) {
+		return args -> telegramService.sendMessage("✅ Telegram notification is working!");
 	}
 }

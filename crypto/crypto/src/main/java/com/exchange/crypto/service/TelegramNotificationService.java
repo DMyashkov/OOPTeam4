@@ -1,37 +1,30 @@
 package com.exchange.crypto.service;
 
 import com.exchange.crypto.config.TelegramProperties;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriUtils;
-
-import java.nio.charset.StandardCharsets;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
-@Slf4j
 public class TelegramNotificationService {
 
-    private final TelegramProperties properties;
+    private final TelegramProperties telegramProperties;
     private final RestTemplate restTemplate;
 
-    public TelegramNotificationService(TelegramProperties properties) {
-        this.properties = properties;
-        this.restTemplate = new RestTemplate();
+    @Autowired
+    public TelegramNotificationService(TelegramProperties telegramProperties, RestTemplate restTemplate) {
+        this.telegramProperties = telegramProperties;
+        this.restTemplate = restTemplate;
     }
 
     public void sendMessage(String message) {
-        String url = String.format(
-                "https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=%s",
-                properties.getBotToken(),
-                properties.getChatId(),
-                UriUtils.encode(message, StandardCharsets.UTF_8)
-        );
+        String url = UriComponentsBuilder
+                .fromHttpUrl("https://api.telegram.org/bot" + telegramProperties.getToken() + "/sendMessage")
+                .queryParam("chat_id", telegramProperties.getChatId())
+                .queryParam("text", message)
+                .toUriString();
 
-        try {
-            restTemplate.getForObject(url, String.class);
-        } catch (Exception e) {
-            log.error("Failed to send Telegram message: {}", e.getMessage());
-        }
+        restTemplate.getForObject(url, String.class);
     }
 }
