@@ -1,9 +1,13 @@
 package com.exchange.crypto.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Type;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -12,28 +16,32 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Notification {
 
     @Id
     @GeneratedValue
     private UUID id;
 
-    @Column(nullable = false)
+    @Column(name = "user_id", nullable = false)
     private UUID userId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private NotificationType type;
 
-    @Column(nullable = false)
-    private String title;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "notification_channels", joinColumns = @JoinColumn(name = "notification_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "channel", nullable = false)
+    private List<Channel> channel;
+
+    @Column(columnDefinition = "jsonb", nullable = false)
+    private String details;
 
     @Column(nullable = false)
-    private String content;
+    private boolean seen = false;
 
-    @Column(nullable = false)
-    private LocalDateTime timestamp;
-
-    @Column(nullable = false)
-    private boolean seen;
+    @Column(name = "created_at", nullable = false)
+    private Timestamp createdAt = Timestamp.from(Instant.now());
 }
