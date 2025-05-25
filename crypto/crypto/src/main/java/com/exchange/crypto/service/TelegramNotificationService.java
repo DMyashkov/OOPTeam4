@@ -1,7 +1,6 @@
 package com.exchange.crypto.service;
 
 import com.exchange.crypto.config.TelegramProperties;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -12,10 +11,9 @@ public class TelegramNotificationService {
     private final TelegramProperties telegramProperties;
     private final RestTemplate restTemplate;
 
-    @Autowired
-    public TelegramNotificationService(TelegramProperties telegramProperties, RestTemplate restTemplate) {
+    public TelegramNotificationService(TelegramProperties telegramProperties) {
         this.telegramProperties = telegramProperties;
-        this.restTemplate = restTemplate;
+        this.restTemplate = new RestTemplate();
     }
 
     public void sendMessage(String message) {

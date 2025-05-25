@@ -19,9 +19,8 @@ public class CryptoApplication {
 		return new RestTemplate();
 	}
 
-	// Simple test on app startup
 	@Bean
 	public CommandLineRunner sendTelegramMessage(TelegramNotificationService telegramService) {
-		return args -> telegramService.sendMessage("✅ Telegram notification is working!");
+		return args -> telegramService.sendMessage("Telegram notification system is working.");
 	}
 }
