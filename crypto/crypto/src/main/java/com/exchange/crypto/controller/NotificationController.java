@@ -4,7 +4,6 @@ import com.exchange.crypto.dto.NotificationRequest;
 import com.exchange.crypto.model.Notification;
 import com.exchange.crypto.service.InAppNotificationService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,10 +12,13 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/notifications")
-@RequiredArgsConstructor
 public class NotificationController {
 
     private final InAppNotificationService notificationService;
+
+    public NotificationController(InAppNotificationService notificationService) {
+        this.notificationService = notificationService;
+    }
 
     @PostMapping
     public ResponseEntity<Notification> createNotification(@Valid @RequestBody NotificationRequest request) {

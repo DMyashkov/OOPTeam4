@@ -4,7 +4,6 @@ import com.exchange.crypto.dto.NotificationRequest;
 import com.exchange.crypto.model.Notification;
 import com.exchange.crypto.repository.NotificationRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -13,11 +12,14 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 public class InAppNotificationService {
 
     private final NotificationRepository notificationRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public InAppNotificationService(NotificationRepository notificationRepository) {
+        this.notificationRepository = notificationRepository;
+    }
 
     public Notification createNotification(NotificationRequest request) {
         try {
