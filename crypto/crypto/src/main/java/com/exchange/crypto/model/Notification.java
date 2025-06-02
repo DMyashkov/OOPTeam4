@@ -45,11 +45,6 @@ public class Notification {
     @Column(name = "created_at", nullable = false)
     private Timestamp createdAt = Timestamp.from(Instant.now());
 
-<<<<<<< HEAD
-=======
-    public Notification() {}
-
->>>>>>> HeNeedSomeMilk
     public Notification(UUID id, UUID userId, NotificationType type, List<Channel> channel, String details, boolean seen, Timestamp createdAt) {
         this.id = id;
         this.userId = userId;

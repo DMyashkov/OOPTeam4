@@ -2,12 +2,16 @@ package com.exchange.crypto.repository;
 
 import com.exchange.crypto.model.Notification;
 import com.exchange.crypto.model.NotificationType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface NotificationRepository extends JpaRepository<Notification, UUID> {
+
+    Page<Notification> findByUserId(UUID userId, Pageable pageable);
 
     List<Notification> findByUserId(UUID userId);
 

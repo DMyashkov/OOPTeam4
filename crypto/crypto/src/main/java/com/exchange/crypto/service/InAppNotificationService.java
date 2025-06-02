@@ -4,6 +4,8 @@ import com.exchange.crypto.dto.NotificationRequest;
 import com.exchange.crypto.model.Notification;
 import com.exchange.crypto.repository.NotificationRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -39,8 +41,8 @@ public class InAppNotificationService {
         }
     }
 
-    public List<Notification> getNotificationsForUser(UUID userId) {
-        return notificationRepository.findByUserId(userId);
+    public Page<Notification> getNotificationsForUser(UUID userId, Pageable pageable) {
+        return notificationRepository.findByUserId(userId, pageable);
     }
 
     public void markAsSeen(UUID notificationId) {

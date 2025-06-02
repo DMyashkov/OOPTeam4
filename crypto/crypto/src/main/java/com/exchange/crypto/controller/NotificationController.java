@@ -4,6 +4,8 @@ import com.exchange.crypto.dto.NotificationRequest;
 import com.exchange.crypto.model.Notification;
 import com.exchange.crypto.service.InAppNotificationService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,8 +29,8 @@ public class NotificationController {
     }
 
     @GetMapping("/user/{id}")
-    public ResponseEntity<List<Notification>> getUserNotifications(@PathVariable("id") UUID userId) {
-        List<Notification> notifications = notificationService.getNotificationsForUser(userId);
+    public ResponseEntity<Page<Notification>> getUserNotifications(@PathVariable("id") UUID userId, Pageable pageable) {
+        Page<Notification> notifications = notificationService.getNotificationsForUser(userId, pageable);
         return ResponseEntity.ok(notifications);
     }
 
