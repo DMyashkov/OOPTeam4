@@ -43,8 +43,19 @@ public class InAppNotificationService {
         }
     }
 
-    public Page<Notification> getNotificationsForUser(UUID userId, Pageable pageable) {
-        return notificationRepository.findByUserId(userId, pageable);
+    public Page<Notification> getNotificationsForUser(UUID userId, Pageable pageable, Channel channel, NotificationType type) {
+        if (channel != null && type != null) {
+            // Need to add this method to repository
+            return notificationRepository.findByUserIdAndChannelContainingAndType(userId, channel, type, pageable);
+        } else if (channel != null) {
+            // Need to add this method to repository
+            return notificationRepository.findByUserIdAndChannelContaining(userId, channel, pageable);
+        } else if (type != null) {
+            // Need to add this method to repository
+            return notificationRepository.findByUserIdAndType(userId, type, pageable);
+        } else {
+            return notificationRepository.findByUserId(userId, pageable);
+        }
     }
 
     public void markAsSeen(UUID notificationId) {
@@ -55,15 +66,16 @@ public class InAppNotificationService {
         notificationRepository.save(notification);
     }
 
-    public List<Notification> getNotificationsForUserByChannel(UUID userId, Channel channel) {
-        return notificationRepository.findByUserIdAndChannelContaining(userId, channel);
-    }
+    // The following methods are no longer needed as filtering is integrated into getNotificationsForUser
+    // public List<Notification> getNotificationsForUserByChannel(UUID userId, Channel channel) {
+    //     return notificationRepository.findByUserIdAndChannelContaining(userId, channel);
+    // }
 
-    public List<Notification> getNotificationsForUserByType(UUID userId, NotificationType type) {
-        return notificationRepository.findByUserIdAndType(userId, type);
-    }
+    // public List<Notification> getNotificationsForUserByType(UUID userId, NotificationType type) {
+    //     return notificationRepository.findByUserIdAndType(userId, type);
+    // }
 
-    public List<Notification> getNotificationsForUserByChannelAndType(UUID userId, Channel channel, NotificationType type) {
-        return notificationRepository.findByUserIdAndChannelContainingAndType(userId, channel, type);
-    }
+    // public List<Notification> getNotificationsForUserByChannelAndType(UUID userId, Channel channel, NotificationType type) {
+    //     return notificationRepository.findByUserIdAndChannelContainingAndType(userId, channel, type);
+    // }
 }

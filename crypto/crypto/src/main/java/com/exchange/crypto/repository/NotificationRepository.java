@@ -25,4 +25,11 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
     List<Notification> findByUserIdAndChannelContaining(UUID userId, Channel channel);
 
     List<Notification> findByUserIdAndChannelContainingAndType(UUID userId, Channel channel, NotificationType type);
+
+    // Methods for filtering with pagination
+    Page<Notification> findByUserIdAndType(UUID userId, NotificationType type, Pageable pageable);
+
+    Page<Notification> findByUserIdAndChannelContaining(UUID userId, Channel channel, Pageable pageable);
+
+    Page<Notification> findByUserIdAndChannelContainingAndType(UUID userId, Channel channel, NotificationType type, Pageable pageable);
 }
