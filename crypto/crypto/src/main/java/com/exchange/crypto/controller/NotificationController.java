@@ -1,7 +1,9 @@
 package com.exchange.crypto.controller;
 
 import com.exchange.crypto.dto.NotificationRequest;
+import com.exchange.crypto.model.Channel;
 import com.exchange.crypto.model.Notification;
+import com.exchange.crypto.model.NotificationType;
 import com.exchange.crypto.service.InAppNotificationService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -29,10 +31,36 @@ public class NotificationController {
     }
 
     @GetMapping("/user/{id}")
+<<<<<<< HEAD
     public ResponseEntity<Page<Notification>> getUserNotifications(@PathVariable("id") UUID userId, Pageable pageable) {
         Page<Notification> notifications = notificationService.getNotificationsForUser(userId, pageable);
+=======
+    public ResponseEntity<List<Notification>> getUserNotifications(
+            @PathVariable("id") UUID userId,
+            @RequestParam(name = "channel", required = false) Channel channel,
+            @RequestParam(name = "type", required = false) NotificationType type
+    ) {
+        List<Notification> notifications;
+
+        if (channel != null && type != null) {
+            notifications = notificationService.getNotificationsForUserByChannelAndType(userId, channel, type);
+        } else if (channel != null) {
+            notifications = notificationService.getNotificationsForUserByChannel(userId, channel);
+        } else if (type != null) {
+            notifications = notificationService.getNotificationsForUserByType(userId, type);
+        } else {
+            notifications = notificationService.getNotificationsForUser(userId);
+        }
+        // Example requests:
+        // - "/notifications/user/user123"
+        // - "/notifications/user/user123?channel=EMAIL"
+        // - "/notifications/user/user123?type=TRANSACTION_SUCCESS"
+        // - "/notifications/user/user123?channel=EMAIL&type=TRANSACTION_SUCCESS"
+
+>>>>>>> cc64f19bc1ced3e22c5a463ed87637244d4a19c5
         return ResponseEntity.ok(notifications);
     }
+
 
     @PatchMapping("/{id}/seen")
     public ResponseEntity<Void> markAsSeen(@PathVariable("id") UUID notificationId) {

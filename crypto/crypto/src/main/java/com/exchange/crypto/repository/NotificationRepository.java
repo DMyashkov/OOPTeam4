@@ -1,5 +1,6 @@
 package com.exchange.crypto.repository;
 
+import com.exchange.crypto.model.Channel;
 import com.exchange.crypto.model.Notification;
 import com.exchange.crypto.model.NotificationType;
 import org.springframework.data.domain.Page;
@@ -17,7 +18,11 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
 
     List<Notification> findByUserIdAndSeenFalse(UUID userId);
 
+    boolean existsByUserIdAndSeenFalse(UUID userId);
+
     List<Notification> findByUserIdAndType(UUID userId, NotificationType type);
 
-    boolean existsByUserIdAndSeenFalse(UUID userId);
+    List<Notification> findByUserIdAndChannelContaining(UUID userId, Channel channel);
+
+    List<Notification> findByUserIdAndChannelContainingAndType(UUID userId, Channel channel, NotificationType type);
 }

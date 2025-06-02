@@ -1,7 +1,9 @@
 package com.exchange.crypto.service;
 
 import com.exchange.crypto.dto.NotificationRequest;
+import com.exchange.crypto.model.Channel;
 import com.exchange.crypto.model.Notification;
+import com.exchange.crypto.model.NotificationType;
 import com.exchange.crypto.repository.NotificationRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.domain.Page;
@@ -51,5 +53,17 @@ public class InAppNotificationService {
 
         notification.setSeen(true);
         notificationRepository.save(notification);
+    }
+
+    public List<Notification> getNotificationsForUserByChannel(UUID userId, Channel channel) {
+        return notificationRepository.findByUserIdAndChannelContaining(userId, channel);
+    }
+
+    public List<Notification> getNotificationsForUserByType(UUID userId, NotificationType type) {
+        return notificationRepository.findByUserIdAndType(userId, type);
+    }
+
+    public List<Notification> getNotificationsForUserByChannelAndType(UUID userId, Channel channel, NotificationType type) {
+        return notificationRepository.findByUserIdAndChannelContainingAndType(userId, channel, type);
     }
 }
