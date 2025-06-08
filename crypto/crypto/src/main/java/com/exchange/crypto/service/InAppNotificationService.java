@@ -20,9 +20,11 @@ public class InAppNotificationService {
 
     private final NotificationRepository notificationRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final NotificationSendingService notificationSendingService;
 
-    public InAppNotificationService(NotificationRepository notificationRepository) {
+    public InAppNotificationService(NotificationRepository notificationRepository, NotificationSendingService notificationSendingService) {
         this.notificationRepository = notificationRepository;
+        this.notificationSendingService = notificationSendingService;
     }
 
     public Notification createNotification(NotificationRequest request) {
@@ -37,7 +39,13 @@ public class InAppNotificationService {
                     .seen(false)
                     .build();
 
-            return notificationRepository.save(notification);
+            Notification savedNotification = notificationRepository.save(notification);
+
+            if (savedNotification.getChannel().contains(Channel.TELEGRAM)) {
+                notificationSendingService.sendTelegramNotifications();
+            }
+
+            return savedNotification;
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid JSON in details");
         }
