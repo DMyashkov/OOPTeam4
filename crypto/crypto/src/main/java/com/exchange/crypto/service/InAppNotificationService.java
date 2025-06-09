@@ -6,6 +6,7 @@ import com.exchange.crypto.model.Notification;
 import com.exchange.crypto.model.NotificationType;
 import com.exchange.crypto.repository.NotificationRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -15,33 +16,44 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.UUID;
 
+@AllArgsConstructor
 @Service
 public class InAppNotificationService {
 
     private final NotificationRepository notificationRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final NotificationSendingService notificationSendingService;
-
-    public InAppNotificationService(NotificationRepository notificationRepository, NotificationSendingService notificationSendingService) {
-        this.notificationRepository = notificationRepository;
-        this.notificationSendingService = notificationSendingService;
-    }
+    private final UserNotificationPreferenceService preferenceService;
 
     public Notification createNotification(NotificationRequest request) {
         try {
             String jsonDetails = objectMapper.writeValueAsString(request.getDetails());
 
+            List<Channel> allowedChannels = preferenceService.getAllowedChannelsForUser(request.getUser_id(), request.getType());
+
+            if (allowedChannels.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No channels enabled for this user and notification type");
+            }
+
+            List<Channel> filteredChannels = request.getChannel().stream()
+                    .filter(allowedChannels::contains)
+                    .toList();
+
+            if (filteredChannels.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Requested channels not allowed for this user");
+            }
+
             Notification notification = Notification.builder()
                     .userId(request.getUser_id())
                     .type(request.getType())
-                    .channel(request.getChannel())
+                    .channel(filteredChannels)
                     .details(jsonDetails)
                     .seen(false)
                     .build();
 
             Notification savedNotification = notificationRepository.save(notification);
 
-            if (savedNotification.getChannel().contains(Channel.TELEGRAM)) {
+            if (filteredChannels.contains(Channel.TELEGRAM)) {
                 notificationSendingService.sendTelegramNotifications();
             }
 
@@ -51,15 +63,13 @@ public class InAppNotificationService {
         }
     }
 
+
     public Page<Notification> getNotificationsForUser(UUID userId, Pageable pageable, Channel channel, NotificationType type) {
         if (channel != null && type != null) {
-            // Need to add this method to repository
             return notificationRepository.findByUserIdAndChannelContainingAndType(userId, channel, type, pageable);
         } else if (channel != null) {
-            // Need to add this method to repository
             return notificationRepository.findByUserIdAndChannelContaining(userId, channel, pageable);
         } else if (type != null) {
-            // Need to add this method to repository
             return notificationRepository.findByUserIdAndType(userId, type, pageable);
         } else {
             return notificationRepository.findByUserId(userId, pageable);

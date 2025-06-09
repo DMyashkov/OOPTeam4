@@ -48,8 +48,4 @@ public class Notification {
     @Column(name = "created_at", nullable = false)
     @Builder.Default
     private Timestamp createdAt = Timestamp.from(Instant.now());
-
-    public void setSeen(boolean seen) {
-        this.seen = seen;
-    }
 }

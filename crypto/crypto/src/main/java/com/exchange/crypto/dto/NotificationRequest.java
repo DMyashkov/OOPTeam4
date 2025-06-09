@@ -30,20 +30,4 @@ public class NotificationRequest {
 
     @NotNull
     private Object details; // Приема всякакъв JSON обект (ще го сериализираме като String)
-
-    public UUID getUser_id() {
-        return user_id;
-    }
-
-    public NotificationType getType() {
-        return type;
-    }
-
-    public List<Channel> getChannel() {
-        return channel;
-    }
-
-    public Object getDetails() {
-        return details;
-    }
 }

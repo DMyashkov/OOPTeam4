@@ -2,11 +2,9 @@ package com.exchange.crypto.service;
 
 import com.exchange.crypto.model.Channel;
 import com.exchange.crypto.model.Notification;
-import com.exchange.crypto.model.NotificationType;
 import com.exchange.crypto.repository.NotificationRepository;
 import com.exchange.crypto.utils.TelegramMessageFormatter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.scheduling.annotation.Async;
 

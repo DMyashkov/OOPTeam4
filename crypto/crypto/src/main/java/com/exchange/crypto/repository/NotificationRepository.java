@@ -11,9 +11,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface NotificationRepository extends JpaRepository<Notification, UUID> {
-
-    Page<Notification> findByUserId(UUID userId, Pageable pageable);
-
     List<Notification> findByUserId(UUID userId);
 
     List<Notification> findByUserIdAndSeenFalse(UUID userId);
@@ -26,11 +23,13 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
 
     List<Notification> findByUserIdAndChannelContainingAndType(UUID userId, Channel channel, NotificationType type);
 
+    List<Notification> findByChannelContainingAndSeenFalse(Channel channel);
+
+    Page<Notification> findByUserId(UUID userId, Pageable pageable);
+
     Page<Notification> findByUserIdAndType(UUID userId, NotificationType type, Pageable pageable);
 
     Page<Notification> findByUserIdAndChannelContaining(UUID userId, Channel channel, Pageable pageable);
 
     Page<Notification> findByUserIdAndChannelContainingAndType(UUID userId, Channel channel, NotificationType type, Pageable pageable);
-
-    List<Notification> findByChannelContainingAndSeenFalse(Channel channel);
 }
