@@ -1,4 +1,3 @@
-// UserNotificationPreferenceRepository.java
 package com.exchange.crypto.repository;
 
 import com.exchange.crypto.model.UserNotificationPreference;

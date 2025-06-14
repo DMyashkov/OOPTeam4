@@ -2,6 +2,7 @@ package com.exchange.crypto.repository;
 
 import com.exchange.crypto.model.Channel;
 import com.exchange.crypto.model.Notification;
+import com.exchange.crypto.model.NotificationStatus;
 import com.exchange.crypto.model.NotificationType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +25,10 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
     List<Notification> findByUserIdAndChannelContainingAndType(UUID userId, Channel channel, NotificationType type);
 
     List<Notification> findByChannelContainingAndSeenFalse(Channel channel);
+
+    List<Notification> findByStatus(NotificationStatus status);
+
+    List<Notification> findByStatusAndChannelContaining(NotificationStatus status, Channel channel);
 
     Page<Notification> findByUserId(UUID userId, Pageable pageable);
 
