@@ -45,6 +45,15 @@ public class Notification {
     @Builder.Default
     private boolean seen = false;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private NotificationStatus status = NotificationStatus.PENDING;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private int retryCount = 0;
+
     @Column(name = "created_at", nullable = false)
     @Builder.Default
     private Timestamp createdAt = Timestamp.from(Instant.now());

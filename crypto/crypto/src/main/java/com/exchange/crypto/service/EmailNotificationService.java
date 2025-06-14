@@ -2,11 +2,13 @@ package com.exchange.crypto.service;
 
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
+import org.springframework.stereotype.Service;
 import java.util.Properties;
 
+@Service
 public class EmailNotificationService {
 
-    public static void sendEmail(String to, String subject, String body) {
+    public void sendEmail(String to, String subject, String body) {
         final String from = "crypto.exchange.notif@gmail.com";
         final String password = "lnmr gwko hlqa ofrn";
 
