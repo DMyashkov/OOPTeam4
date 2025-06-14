@@ -20,6 +20,7 @@ public class NotificationSendingService {
 
     private final NotificationRepository notificationRepository;
     private final TelegramNotificationService telegramNotificationService;
+    private final EmailNotificationService emailNotificationService;
     private final ObjectMapper objectMapper;
 
     // Schedule this method to run periodically (e.g., every 60 seconds)
@@ -31,19 +32,11 @@ public class NotificationSendingService {
 
         for (Notification notification : telegramNotifications) {
             try {
-                // Log the raw details string
                 System.out.println("Raw notification details: " + notification.getDetails());
-
-                // Parse the details JSON string into a Map
                 Map<String, Object> detailsMap = objectMapper.readValue(notification.getDetails(), Map.class);
-
-                // Format the message using the details map
                 String message = TelegramMessageFormatter.format(notification.getType(), detailsMap);
-
-                // Send the message via Telegram
                 telegramNotificationService.sendMessage(message);
 
-                // Mark the notification as seen
                 notification.setSeen(true);
                 notification.setStatus(NotificationStatus.SENT);
                 notificationRepository.save(notification);
@@ -60,8 +53,42 @@ public class NotificationSendingService {
         }
     }
 
+    @Async
+    public void sendEmailNotifications() {
+        List<Notification> emailNotifications = notificationRepository
+                .findByStatusAndChannelContaining(NotificationStatus.PENDING, Channel.EMAIL);
+
+        for (Notification notification : emailNotifications) {
+            try {
+                Map<String, Object> detailsMap = objectMapper.readValue(notification.getDetails(), Map.class);
+
+                String email = (String) detailsMap.get("email");
+                String subject = "Crypto Exchange Notification - " + notification.getType();
+                String body = detailsMap.toString(); // Може да го направиш по-красив с друг форматер
+
+                emailNotificationService.sendEmail(email, subject, body);
+
+                notification.setSeen(true);
+                notification.setStatus(NotificationStatus.SENT);
+                notificationRepository.save(notification);
+
+                System.out.println("Sent Email notification for notification ID: " + notification.getId());
+
+            } catch (Exception e) {
+                notification.setRetryCount(notification.getRetryCount() + 1);
+                if (notification.getRetryCount() >= 3) {
+                    notification.setStatus(NotificationStatus.FAILED);
+                }
+                notificationRepository.save(notification);
+
+                System.err.println("Email sending failed: " + e.getMessage());
+            }
+        }
+    }
+
     @Scheduled(fixedDelay = 60000)
     public void retryFailedNotifications() {
+        // Telegram
         List<Notification> failedTelegram = notificationRepository
                 .findByStatusAndChannelContaining(NotificationStatus.FAILED, Channel.TELEGRAM);
 
@@ -75,7 +102,29 @@ public class NotificationSendingService {
                 notif.setStatus(NotificationStatus.SENT);
             } catch (Exception e) {
                 notif.setRetryCount(notif.getRetryCount() + 1);
-                System.err.println("Retry failed: " + e.getMessage());
+                System.err.println("Telegram retry failed: " + e.getMessage());
+            }
+            notificationRepository.save(notif);
+        }
+
+        // Email
+        List<Notification> failedEmail = notificationRepository
+                .findByStatusAndChannelContaining(NotificationStatus.FAILED, Channel.EMAIL);
+
+        for (Notification notif : failedEmail) {
+            try {
+                Map<String, Object> detailsMap = objectMapper.readValue(notif.getDetails(), Map.class);
+                String email = (String) detailsMap.get("email");
+                String subject = "Crypto Exchange Notification - " + notif.getType();
+                String body = detailsMap.toString();
+
+                emailNotificationService.sendEmail(email, subject, body);
+
+                notif.setSeen(true);
+                notif.setStatus(NotificationStatus.SENT);
+            } catch (Exception e) {
+                notif.setRetryCount(notif.getRetryCount() + 1);
+                System.err.println("Email retry failed: " + e.getMessage());
             }
             notificationRepository.save(notif);
         }

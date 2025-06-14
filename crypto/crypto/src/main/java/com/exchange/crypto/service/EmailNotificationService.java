@@ -2,8 +2,10 @@ package com.exchange.crypto.service;
 
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
+import org.springframework.stereotype.Service;
 import java.util.Properties;
 
+@Service
 public class EmailNotificationService {
 
     public void sendEmail(String to, String subject, String body) {
