@@ -1,20 +1,23 @@
 package com.exchange.crypto.service;
 
-import com.exchange.crypto.dto.NotificationRequest;
-import com.exchange.crypto.model.Channel;
-import com.exchange.crypto.model.Notification;
-import com.exchange.crypto.model.NotificationType;
-import com.exchange.crypto.repository.NotificationRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
+import java.util.List;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.UUID;
+import com.exchange.crypto.dto.NotificationRequest;
+import com.exchange.crypto.model.Channel;
+import com.exchange.crypto.model.Notification;
+import com.exchange.crypto.model.NotificationStatus;
+import com.exchange.crypto.model.NotificationType;
+import com.exchange.crypto.repository.NotificationRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @Service
@@ -23,21 +26,21 @@ public class InAppNotificationService {
     private final NotificationRepository notificationRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final NotificationSendingService notificationSendingService;
-    private final UserNotificationPreferenceService preferenceService;
 
     public Notification createNotification(NotificationRequest request) {
         try {
+            System.out.println("Received notification request: " + request);
             String jsonDetails = objectMapper.writeValueAsString(request.getDetails());
+            System.out.println("Serialized details: " + jsonDetails);
 
-            List<Channel> allowedChannels = preferenceService.getAllowedChannelsForUser(request.getUser_id(), request.getType());
-
-            if (allowedChannels.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No channels enabled for this user and notification type");
-            }
+            // Since we're only using Telegram, we don't need to check preferences
+            List<Channel> allowedChannels = List.of(Channel.TELEGRAM);
+            System.out.println("Allowed channels: " + allowedChannels);
 
             List<Channel> filteredChannels = request.getChannel().stream()
                     .filter(allowedChannels::contains)
                     .toList();
+            System.out.println("Filtered channels: " + filteredChannels);
 
             if (filteredChannels.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Requested channels not allowed for this user");
@@ -49,20 +52,26 @@ public class InAppNotificationService {
                     .channel(filteredChannels)
                     .details(jsonDetails)
                     .seen(false)
+                    .status(NotificationStatus.PENDING)
+                    .retryCount(0)
                     .build();
 
+            System.out.println("Created notification object: " + notification);
             Notification savedNotification = notificationRepository.save(notification);
+            System.out.println("Saved notification: " + savedNotification);
 
             if (filteredChannels.contains(Channel.TELEGRAM)) {
+                System.out.println("Triggering Telegram notification sending");
                 notificationSendingService.sendTelegramNotifications();
             }
 
             return savedNotification;
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid JSON in details");
+            System.err.println("Error creating notification: " + e.getMessage());
+            e.printStackTrace();
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error creating notification: " + e.getMessage());
         }
     }
-
 
     public Page<Notification> getNotificationsForUser(UUID userId, Pageable pageable, Channel channel, NotificationType type) {
         if (channel != null && type != null) {

@@ -1,18 +1,20 @@
 package com.exchange.crypto.service;
 
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
 import com.exchange.crypto.model.Channel;
 import com.exchange.crypto.model.Notification;
+import com.exchange.crypto.model.NotificationStatus;
 import com.exchange.crypto.repository.NotificationRepository;
 import com.exchange.crypto.utils.TelegramMessageFormatter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import org.springframework.scheduling.annotation.Async;
-import com.exchange.crypto.model.NotificationStatus;
 
-import java.util.List;
-import java.util.Map;
+import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @Service
@@ -26,13 +28,13 @@ public class NotificationSendingService {
     // Schedule this method to run periodically (e.g., every 60 seconds)
     @Async
     public void sendTelegramNotifications() {
-        // Find unseen notifications for the Telegram channel
+        // Find all pending notifications for the Telegram channel
         List<Notification> telegramNotifications = notificationRepository
                 .findByStatusAndChannelContaining(NotificationStatus.PENDING, Channel.TELEGRAM);
 
         for (Notification notification : telegramNotifications) {
             try {
-                System.out.println("Raw notification details: " + notification.getDetails());
+                System.out.println("Processing Telegram notification: " + notification.getId());
                 Map<String, Object> detailsMap = objectMapper.readValue(notification.getDetails(), Map.class);
                 String message = TelegramMessageFormatter.format(notification.getType(), detailsMap);
                 telegramNotificationService.sendMessage(message);
@@ -44,6 +46,7 @@ public class NotificationSendingService {
                 System.out.println("Sent Telegram notification for notification ID: " + notification.getId());
 
             } catch (Exception e) {
+                System.err.println("Error sending Telegram notification: " + e.getMessage());
                 notification.setRetryCount(notification.getRetryCount() + 1);
                 if (notification.getRetryCount() >= 3) {
                     notification.setStatus(NotificationStatus.FAILED);

@@ -12,22 +12,24 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class NotificationRequest {
 
-    @NotNull
+    @NotNull(message = "user_id is required")
     private UUID user_id;
 
-    @NotNull
+    @NotNull(message = "type is required")
     private NotificationType type;
 
-    @NotEmpty
+    @NotEmpty(message = "channel list cannot be empty")
     private List<Channel> channel;
 
-    @NotNull
+    @NotNull(message = "details are required")
     private Object details; // Приема всякакъв JSON обект (ще го сериализираме като String)
 }

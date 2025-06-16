@@ -1,8 +1,8 @@
 package com.exchange.crypto.utils;
 
-import com.exchange.crypto.model.NotificationType;
-
 import java.util.Map;
+
+import com.exchange.crypto.model.NotificationType;
 
 public class TelegramMessageFormatter {
 
