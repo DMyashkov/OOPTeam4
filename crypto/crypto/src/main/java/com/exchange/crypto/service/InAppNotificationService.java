@@ -1,8 +1,12 @@
 package com.exchange.crypto.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
+import com.exchange.crypto.dto.NotificationResponse;
+import com.exchange.crypto.utils.InAppNotificationFormatter;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -26,6 +30,7 @@ public class InAppNotificationService {
     private final NotificationRepository notificationRepository;
     private final UserNotificationPreferenceService preferenceService;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final InAppNotificationFormatter inAppFormatter;
 
     public Notification createNotification(NotificationRequest request) {
         try {
@@ -80,5 +85,34 @@ public class InAppNotificationService {
 
         notification.setSeen(true);
         notificationRepository.save(notification);
+    }
+
+    public Page<NotificationResponse> getFormattedNotificationsForUser(UUID userId, Pageable pageable, NotificationType type) {
+        Page<Notification> notifications;
+        if (type != null) {
+            notifications = notificationRepository.findByUserIdAndType(userId, type, pageable);
+        } else {
+            notifications = notificationRepository.findByUserId(userId, pageable);
+        }
+        return notifications.map(this::toResponse);
+    }
+
+    private NotificationResponse toResponse(Notification notification) {
+        try {
+            Map<String, Object> details = objectMapper.readValue(notification.getDetails(), new TypeReference<>() {});
+            String message = inAppFormatter.format(notification.getType(), details); // Use formatter
+            return NotificationResponse.builder()
+                    .id(notification.getId())
+                    .type(notification.getType())
+                    .message(message)
+                    .seen(notification.isSeen())
+                    .createdAt(notification.getCreatedAt())
+                    .build();
+        } catch (Exception e) {
+            return NotificationResponse.builder()
+                    .id(notification.getId())
+                    .message("Could not format notification.")
+                    .build();
+        }
     }
 }
