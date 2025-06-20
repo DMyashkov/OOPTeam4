@@ -2,6 +2,7 @@ package com.exchange.crypto.service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -22,7 +23,7 @@ public class UserNotificationPreferenceService {
 
     public List<Channel> getAllowedChannelsForUser(UUID userId, NotificationType type) {
         System.out.println("Getting allowed channels for user: " + userId + ", type: " + type);
-        List<Channel> channels = preferenceRepository.findByUserIdAndNotificationType(userId, type)
+        List<Channel> channels = preferenceRepository.findFirstByUserIdAndNotificationTypeOrderByIdDesc(userId, type)
                 .map(UserNotificationPreference::getChannels)
                 .orElse(Collections.emptyList());
         System.out.println("Found channels: " + channels);
@@ -32,17 +33,18 @@ public class UserNotificationPreferenceService {
     @Transactional
     public void savePreference(UserNotificationPreference preference) {
         System.out.println("Saving preference: " + preference);
-        // Try to find existing preference
-        preferenceRepository.findByUserIdAndNotificationType(preference.getUserId(), preference.getNotificationType())
-                .ifPresent(existingPreference -> {
-                    // Update existing preference
-                    existingPreference.setChannels(preference.getChannels());
-                    preferenceRepository.save(existingPreference);
-                });
-        
-        // If no existing preference was found, save the new one
-        if (!preferenceRepository.findByUserIdAndNotificationType(preference.getUserId(), preference.getNotificationType()).isPresent()) {
+
+        Optional<UserNotificationPreference> existingOpt = preferenceRepository
+                .findFirstByUserIdAndNotificationTypeOrderByIdDesc(preference.getUserId(), preference.getNotificationType());
+
+        if (existingOpt.isPresent()) {
+            UserNotificationPreference existingPreference = existingOpt.get();
+            existingPreference.setChannels(preference.getChannels());
+            preferenceRepository.save(existingPreference);
+            System.out.println("Updated existing preference for user " + preference.getUserId());
+        } else {
             preferenceRepository.save(preference);
+            System.out.println("Saved new preference for user " + preference.getUserId());
         }
     }
 }
