@@ -24,8 +24,8 @@ import lombok.AllArgsConstructor;
 public class InAppNotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final UserNotificationPreferenceService preferenceService;
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final NotificationSendingService notificationSendingService;
 
     public Notification createNotification(NotificationRequest request) {
         try {
@@ -33,14 +33,17 @@ public class InAppNotificationService {
             String jsonDetails = objectMapper.writeValueAsString(request.getDetails());
             System.out.println("Serialized details: " + jsonDetails);
 
-            // Since we're only using Telegram, we don't need to check preferences
-            List<Channel> allowedChannels = List.of(Channel.TELEGRAM);
-            System.out.println("Allowed channels: " + allowedChannels);
+            List<Channel> allowedChannels = preferenceService.getAllowedChannelsForUser(request.getUser_id(), request.getType());
+            System.out.println("User's allowed channels for this type: " + allowedChannels);
+
+            if (allowedChannels.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User has not subscribed to this notification type.");
+            }
 
             List<Channel> filteredChannels = request.getChannel().stream()
                     .filter(allowedChannels::contains)
                     .toList();
-            System.out.println("Filtered channels: " + filteredChannels);
+            System.out.println("Filtered channels based on preferences: " + filteredChannels);
 
             if (filteredChannels.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Requested channels not allowed for this user");
@@ -59,11 +62,6 @@ public class InAppNotificationService {
             System.out.println("Created notification object: " + notification);
             Notification savedNotification = notificationRepository.save(notification);
             System.out.println("Saved notification: " + savedNotification);
-
-            if (filteredChannels.contains(Channel.TELEGRAM)) {
-                System.out.println("Triggering Telegram notification sending");
-                notificationSendingService.sendTelegramNotifications();
-            }
 
             return savedNotification;
         } catch (Exception e) {

@@ -22,9 +22,4 @@ public class CryptoApplication {
 	public RestTemplate restTemplate() {
 		return new RestTemplate();
 	}
-
-	@Bean
-	public CommandLineRunner sendTelegramMessage(TelegramNotificationService telegramService) {
-		return args -> telegramService.sendMessage("Telegram notification system is working.");
-	}
 }
