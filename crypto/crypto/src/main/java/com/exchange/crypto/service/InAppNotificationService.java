@@ -37,22 +37,13 @@ public class InAppNotificationService {
             System.out.println("User's allowed channels for this type: " + allowedChannels);
 
             if (allowedChannels.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User has not subscribed to this notification type.");
-            }
-
-            List<Channel> filteredChannels = request.getChannel().stream()
-                    .filter(allowedChannels::contains)
-                    .toList();
-            System.out.println("Filtered channels based on preferences: " + filteredChannels);
-
-            if (filteredChannels.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Requested channels not allowed for this user");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User has not subscribed to this notification type or has no channels enabled for it.");
             }
 
             Notification notification = Notification.builder()
                     .userId(request.getUser_id())
                     .type(request.getType())
-                    .channel(filteredChannels)
+                    .channel(allowedChannels)
                     .details(jsonDetails)
                     .seen(false)
                     .status(NotificationStatus.PENDING)
