@@ -53,7 +53,6 @@ public class NotificationSendingService {
             String message = TelegramMessageFormatter.format(notification.getType(), detailsMap);
             telegramNotificationService.sendMessage(message);
 
-            // FIX: Mark as SENT, not seen.
             notification.setStatus(NotificationStatus.SENT);
             notificationRepository.save(notification);
             System.out.println("Sent Telegram notification for notification ID: " + notification.getId());
@@ -74,12 +73,10 @@ public class NotificationSendingService {
                 throw new IllegalArgumentException("Email address is missing in notification details.");
             }
             String subject = "Crypto Exchange Notification - " + notification.getType();
-            // A better formatter could be used here for email bodies
             String body = "Details: " + detailsMap.toString();
 
             emailNotificationService.sendEmail(email, subject, body);
 
-            // FIX: Mark as SENT, not seen.
             notification.setStatus(NotificationStatus.SENT);
             notificationRepository.save(notification);
             System.out.println("Sent Email notification for notification ID: " + notification.getId());

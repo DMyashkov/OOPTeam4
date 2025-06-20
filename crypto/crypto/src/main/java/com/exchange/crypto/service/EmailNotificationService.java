@@ -19,11 +19,9 @@ public class EmailNotificationService {
             message.setTo(to);
             message.setSubject(subject);
             message.setText(body);
-            // The 'from' address is configured in application.properties (spring.mail.username)
             javaMailSender.send(message);
             System.out.println("Email sent successfully to " + to);
         } catch (Exception e) {
-            // It's better to let the calling service handle the exception
             throw new RuntimeException("Failed to send email", e);
         }
     }

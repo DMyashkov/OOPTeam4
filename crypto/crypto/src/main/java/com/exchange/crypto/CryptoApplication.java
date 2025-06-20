@@ -1,7 +1,5 @@
 package com.exchange.crypto;
 
-import com.exchange.crypto.service.TelegramNotificationService;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;

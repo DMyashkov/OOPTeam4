@@ -90,17 +90,4 @@ public class InAppNotificationService {
         notification.setSeen(true);
         notificationRepository.save(notification);
     }
-
-    // The following methods are no longer needed as filtering is integrated into getNotificationsForUser
-    // public List<Notification> getNotificationsForUserByChannel(UUID userId, Channel channel) {
-    //     return notificationRepository.findByUserIdAndChannelContaining(userId, channel);
-    // }
-
-    // public List<Notification> getNotificationsForUserByType(UUID userId, NotificationType type) {
-    //     return notificationRepository.findByUserIdAndType(userId, type);
-    // }
-
-    // public List<Notification> getNotificationsForUserByChannelAndType(UUID userId, Channel channel, NotificationType type) {
-    //     return notificationRepository.findByUserIdAndChannelContainingAndType(userId, channel, type);
-    // }
 }
