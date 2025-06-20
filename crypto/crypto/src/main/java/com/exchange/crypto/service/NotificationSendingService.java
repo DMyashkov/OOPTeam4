@@ -1,9 +1,11 @@
 package com.exchange.crypto.service;
 
+import com.exchange.crypto.dto.EmailContent;
 import com.exchange.crypto.model.Channel;
 import com.exchange.crypto.model.Notification;
 import com.exchange.crypto.model.NotificationStatus;
 import com.exchange.crypto.repository.NotificationRepository;
+import com.exchange.crypto.utils.EmailFormatter;
 import com.exchange.crypto.utils.TelegramMessageFormatter;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +26,8 @@ public class NotificationSendingService {
     private final TelegramNotificationService telegramNotificationService;
     private final EmailNotificationService emailNotificationService;
     private final ObjectMapper objectMapper;
+    private final EmailFormatter emailFormatter;
+    private final TelegramMessageFormatter telegramFormatter;
 
     @Scheduled(fixedDelay = 60000) // Run every 60 seconds
     public void sendPendingNotifications() {
@@ -50,7 +54,7 @@ public class NotificationSendingService {
         try {
             System.out.println("Processing Telegram notification: " + notification.getId());
             Map<String, Object> detailsMap = objectMapper.readValue(notification.getDetails(), new TypeReference<>() {});
-            String message = TelegramMessageFormatter.format(notification.getType(), detailsMap);
+            String message = telegramFormatter.format(notification.getType(), detailsMap);
             telegramNotificationService.sendMessage(message);
 
             notification.setStatus(NotificationStatus.SENT);
@@ -72,10 +76,10 @@ public class NotificationSendingService {
             if (email == null || email.isBlank()) {
                 throw new IllegalArgumentException("Email address is missing in notification details.");
             }
-            String subject = "Crypto Exchange Notification - " + notification.getType();
-            String body = "Details: " + detailsMap.toString();
 
-            emailNotificationService.sendEmail(email, subject, body);
+            EmailContent emailContent = emailFormatter.format(notification.getType(), detailsMap);
+
+            emailNotificationService.sendEmail(email, emailContent);
 
             notification.setStatus(NotificationStatus.SENT);
             notificationRepository.save(notification);

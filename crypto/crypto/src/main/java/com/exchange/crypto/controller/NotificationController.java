@@ -1,11 +1,13 @@
 package com.exchange.crypto.controller;
 
 import com.exchange.crypto.dto.NotificationRequest;
+import com.exchange.crypto.dto.NotificationResponse;
 import com.exchange.crypto.model.Channel;
 import com.exchange.crypto.model.Notification;
 import com.exchange.crypto.model.NotificationType;
 import com.exchange.crypto.service.InAppNotificationService;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -15,15 +17,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+@AllArgsConstructor
 @RestController
 @RequestMapping("/notifications")
 public class NotificationController {
 
     private final InAppNotificationService notificationService;
-
-    public NotificationController(InAppNotificationService notificationService) {
-        this.notificationService = notificationService;
-    }
 
     @PostMapping
     public ResponseEntity<Notification> createNotification(@Valid @RequestBody NotificationRequest request) {
@@ -40,6 +39,16 @@ public class NotificationController {
     ) {
         Page<Notification> notifications = notificationService.getNotificationsForUser(userId, pageable, channel, type);
         return ResponseEntity.ok(notifications);
+    }
+
+    @GetMapping("/user/{id}/in-app")
+    public ResponseEntity<Page<NotificationResponse>> getInAppUserNotifications(
+            @PathVariable("id") UUID userId,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(name = "type", required = false) NotificationType type // Add this parameter
+    ) {
+        Page<NotificationResponse> responsePage = notificationService.getFormattedNotificationsForUser(userId, pageable, type);
+        return ResponseEntity.ok(responsePage);
     }
 
     @PatchMapping("/{id}/seen")

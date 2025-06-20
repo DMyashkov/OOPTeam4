@@ -27,9 +27,6 @@ public class NotificationRequest {
     @NotNull(message = "type is required")
     private NotificationType type;
 
-    @NotEmpty(message = "channel list cannot be empty")
-    private List<Channel> channel;
-
     @NotNull(message = "details are required")
-    private Object details; // Приема всякакъв JSON обект (ще го сериализираме като String)
+    private Object details;
 }
