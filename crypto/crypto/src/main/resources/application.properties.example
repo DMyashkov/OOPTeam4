@@ -1,7 +1,7 @@
 # Database config
 spring.datasource.url=jdbc:postgresql://localhost:5432/crypto_notifications
-spring.datasource.username=crypto_notifications_user
-spring.datasource.password=password
+spring.datasource.username=YOUR_DB_USERNAME
+spring.datasource.password=YOUR_DB_PASSWORD
 spring.datasource.driver-class-name=org.postgresql.Driver
 
 # JPA config
@@ -12,14 +12,14 @@ spring.sql.init.mode=always
 spring.jpa.defer-datasource-initialization=true
 
 # Telegram config
-telegram.bot.token=8165915297:AAFQLN2sED34JyUJLbLD-Rs8bIzaT0cSj3I
-telegram.bot.chat-id=6754345152
+telegram.bot.token=YOUR_TELEGRAM_BOT_TOKEN
+telegram.bot.chat-id=YOUR_TELEGRAM_CHAT_ID
 
 # Spring Mail Properties
 spring.mail.host=smtp.gmail.com
 spring.mail.port=587
-spring.mail.username=crypto.exchange.notif@gmail.com
-spring.mail.password=lnmr gwko hlqa ofrn
+spring.mail.username=YOUR-EMAIL@example.com
+spring.mail.password=YOUR_EMAIL_PASSWORD
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
 
