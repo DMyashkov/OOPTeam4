@@ -4,9 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.exchange.crypto.dto.NotificationResponse;
-import com.exchange.crypto.utils.InAppNotificationFormatter;
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -14,11 +11,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.exchange.crypto.dto.NotificationRequest;
+import com.exchange.crypto.dto.NotificationResponse;
 import com.exchange.crypto.model.Channel;
 import com.exchange.crypto.model.Notification;
 import com.exchange.crypto.model.NotificationStatus;
 import com.exchange.crypto.model.NotificationType;
 import com.exchange.crypto.repository.NotificationRepository;
+import com.exchange.crypto.utils.InAppNotificationFormatter;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.AllArgsConstructor;
@@ -48,7 +48,7 @@ public class InAppNotificationService {
             Notification notification = Notification.builder()
                     .userId(request.getUser_id())
                     .type(request.getType())
-                    .channel(allowedChannels)
+                    .channel(new java.util.ArrayList<>(allowedChannels))
                     .details(jsonDetails)
                     .seen(false)
                     .status(NotificationStatus.PENDING)
